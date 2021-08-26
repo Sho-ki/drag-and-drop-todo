@@ -85,17 +85,13 @@ async function changePosition(currEl, currElId) {
 function startEditToDo(txtTag, id) {
   const input = document.createElement("input");
   input.value = txtTag.innerText;
-
   const okButton = document.createElement("button");
   okButton.innerText = "OK";
-
   okButton.setAttribute(
     "onClick",
     `finishEditToDo(this, this.previousSibling, ${id})`
   );
-
   txtTag.parentNode.insertBefore(okButton, txtTag.nextSibling);
-
   txtTag.replaceWith(input);
 }
 
