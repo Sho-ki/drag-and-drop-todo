@@ -17,14 +17,11 @@ window.onload = async () => {
         datas.results.forEach((data) => {
           const todoEl = document.createElement("div");
           todoEl.classList.add("item");
-
           const taskId = data.id;
           const text = data.todo;
 
           todoEl.setAttribute("taskId", taskId);
           todoEl.innerHTML = `<span class="txt" onClick="startEditToDo(this, ${taskId})">${text}</span><i class="trash fa fa-trash" onClick="deleteToDo(this.parentNode, ${taskId})"></i><i class="icon fa fa-bars"></i>`;
-          // When drag is over, changePosition() is called.
-          // todoEl = the whole element of todo, taskId = the moved task's id
           todoEl.addEventListener("dragend", () => {
             changePosition(todoEl, taskId);
           });

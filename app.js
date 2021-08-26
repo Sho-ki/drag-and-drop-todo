@@ -7,7 +7,6 @@ const util = require("util");
 require("dotenv").config();
 
 app.use(express.static("public"));
-
 app.use(
   bodyParser.urlencoded({
     extended: true,
@@ -78,16 +77,11 @@ app.post("/add/apis", async (req, res) => {
 // Change order of todo
 app.post("/order/apis/:id", async (req, res) => {
   const id = req.params.id;
-
-  // datas passed from script.js
   let prevElIndex_Number = Number(req.body.prevElIndex_Number);
   let nextElIndex_Number = Number(req.body.nextElIndex_Number);
   let currElIndex_Number;
 
-  // isNaN(prevElIndex_Number) = true, it means that there is no previous element for the element moved.
-  // So currElIndex_Number is nextElIndex_Number - 512, instead of the average index_number of prevElIndex_Number and nextElIndex_Number
   if (isNaN(prevElIndex_Number)) currElIndex_Number = nextElIndex_Number - 512;
-  // The same as well
   else if (isNaN(nextElIndex_Number))
     currElIndex_Number = prevElIndex_Number + 512;
   else
