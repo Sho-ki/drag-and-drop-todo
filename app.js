@@ -30,7 +30,7 @@ connection.connect(() => {
 const port = process.env.PORT || 3000;
 
 // Get api of all todo
-app.get("/list/apis", async (req, res) => {
+app.get("/list-todos", async (req, res) => {
   try {
     const results = await util.promisify(connection.query).bind(connection)(
       "SELECT * FROM todo ORDER BY index_number"
@@ -43,7 +43,7 @@ app.get("/list/apis", async (req, res) => {
 });
 
 // Get api of a selected todo
-app.get("/read/apis/:id", async (req, res) => {
+app.get("/read-todos/:id", async (req, res) => {
   const id = req.params.id;
   try {
     const results = await util.promisify(connection.query).bind(connection)(
@@ -56,7 +56,7 @@ app.get("/read/apis/:id", async (req, res) => {
 });
 
 // Add todo
-app.post("/add/apis", async (req, res) => {
+app.post("/add-todos", async (req, res) => {
   const todo = req.body.todo;
 
   try {
@@ -75,24 +75,25 @@ app.post("/add/apis", async (req, res) => {
 });
 
 // Change order of todo
-app.post("/order/apis/:id", async (req, res) => {
+app.post("/order-todos/:id", async (req, res) => {
   const id = req.params.id;
-  let prevElIndex_Number = Number(req.body.prevElIndex_Number);
-  let nextElIndex_Number = Number(req.body.nextElIndex_Number);
-  let currElIndex_Number;
+  let prevElIndexNumber = req.body.prevElIndexNumber;
+  let nextElIndexNumber = req.body.nextElIndexNumber;
+  let currElIndexNumber;
+  console.log(id, prevElIndexNumber);
 
-  if (isNaN(prevElIndex_Number)) currElIndex_Number = nextElIndex_Number - 512;
-  else if (isNaN(nextElIndex_Number))
-    currElIndex_Number = prevElIndex_Number + 512;
-  else
-    currElIndex_Number = Math.ceil(
-      (prevElIndex_Number + nextElIndex_Number) / 2
-    );
+  if (prevElIndexNumber === undefined) {
+    currElIndexNumber = nextElIndexNumber - 512;
+  } else if (nextElIndexNumber === undefined) {
+    currElIndexNumber = prevElIndexNumber + 512;
+  } else {
+    currElIndexNumber = Math.floor((prevElIndexNumber + nextElIndexNumber) / 2);
+  }
 
   try {
     if (
-      currElIndex_Number === prevElIndex_Number ||
-      currElIndex_Number === nextElIndex_Number
+      currElIndexNumber === prevElIndexNumber ||
+      currElIndexNumber === nextElIndexNumber
     ) {
       const orderedData = await util
         .promisify(connection.query)
@@ -108,7 +109,7 @@ app.post("/order/apis/:id", async (req, res) => {
     }
 
     await util.promisify(connection.query).bind(connection)(
-      `UPDATE todo SET index_number = ${currElIndex_Number} where id = ${id}`
+      `UPDATE todo SET index_number = ${currElIndexNumber} where id = ${id}`
     );
     res.end();
   } catch (e) {
@@ -117,7 +118,7 @@ app.post("/order/apis/:id", async (req, res) => {
 });
 
 // Edit todo
-app.post("/edit/apis/:id", async (req, res) => {
+app.post("/edit-todos/:id", async (req, res) => {
   const id = req.params.id;
   const todo = req.body.newValue;
   console.log(id, todo);
@@ -133,7 +134,7 @@ app.post("/edit/apis/:id", async (req, res) => {
 });
 
 // Delete todo
-app.post("/delete/apis/:id", async (req, res) => {
+app.post("/delete-todos/:id", async (req, res) => {
   const id = req.params.id;
 
   try {
