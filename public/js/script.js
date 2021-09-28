@@ -9,6 +9,7 @@ new Sortable(dragArea, {
 const wrapper = document.getElementById("wrapper");
 window.onload = async () => {
   try {
+    // fetch all data of todo
     await fetch("http://localhost:3000/list-todos")
       .then(async (allToDo) => {
         return await allToDo.json();
@@ -22,6 +23,7 @@ window.onload = async () => {
 
           todoEl.setAttribute("taskId", taskId);
           todoEl.innerHTML = `<span class="txt" onClick="startEditToDo(this, ${taskId})">${text}</span><i class="trash fa fa-trash" onClick="deleteToDo(this.parentNode, ${taskId})"></i><i class="icon fa fa-bars"></i>`;
+          // changePostion() after dragend
           todoEl.addEventListener("dragend", () => {
             changePosition(todoEl, taskId);
           });
@@ -38,7 +40,8 @@ async function changePosition(currEl, currElId) {
   let nextElIndexNumber;
 
   try {
-    // If the element moved is not on the top, put the moved element's index_number into prevElIndexNumber
+    // Get index_number if there is a task on top of the dragged and dropped task
+    // if not, undefined
     if (currEl.previousSibling !== null) {
       const prevElId = currEl.previousSibling.getAttribute("taskId");
 
@@ -51,7 +54,8 @@ async function changePosition(currEl, currElId) {
         });
     }
 
-    // If the element moved is not on the bottom, put the moved element's index_number into nextElIndexNumber
+    // Get index_number if there is a task under the drag & drop task
+    // if not, undefined
     if (currEl.nextSibling != null) {
       const nextElId = currEl.nextSibling.getAttribute("taskId");
       await fetch("http://localhost:3000/read-todos/" + nextElId)
@@ -62,9 +66,8 @@ async function changePosition(currEl, currElId) {
           nextElIndexNumber = json.results[0].index_number;
         });
     }
-    // If the element moved is on the top, there is a no previous element, therefore, prevElIndexNumber is undefined
-    // In the same way, nextElIndexNumber is undefined if no next element is found.
 
+    // HTTP Request
     const updateUrl = "http://localhost:3000/order-todos/" + currElId;
 
     await fetch(updateUrl, {
