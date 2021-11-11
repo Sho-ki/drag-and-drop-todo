@@ -1,12 +1,12 @@
-const express = require("express");
-const mysql = require("mysql2");
-const path = require("path");
+const express = require('express');
+const mysql = require('mysql2');
+const path = require('path');
 const app = express();
-const bodyParser = require("body-parser");
-const util = require("util");
-require("dotenv").config();
+const bodyParser = require('body-parser');
+const util = require('util');
+require('dotenv').config();
 
-app.use(express.static("public"));
+app.use(express.static('public'));
 app.use(
   bodyParser.urlencoded({
     extended: true,
@@ -14,7 +14,7 @@ app.use(
 );
 app.use(bodyParser.json());
 
-const viewsDirectoryPath = path.join(__dirname, "/views");
+const viewsDirectoryPath = path.join(__dirname, '/views');
 
 const connection = mysql.createConnection({
   host: process.env.DB_HOST,
@@ -24,16 +24,16 @@ const connection = mysql.createConnection({
 });
 
 connection.connect(() => {
-  console.log("DB SUCCESSFULLY CONNECTED");
+  console.log('DB SUCCESSFULLY CONNECTED');
 });
 
 const port = process.env.PORT || 3000;
 
 // Get api of all todo
-app.get("/list-todos", async (req, res) => {
+app.get('/list-todos', async (req, res) => {
   try {
     const results = await util.promisify(connection.query).bind(connection)(
-      "SELECT * FROM todo ORDER BY index_number"
+      'SELECT * FROM todo ORDER BY index_number'
     );
 
     res.json({ results });
@@ -43,7 +43,7 @@ app.get("/list-todos", async (req, res) => {
 });
 
 // Get api of a selected todo
-app.get("/read-todos/:id", async (req, res) => {
+app.get('/read-todos/:id', async (req, res) => {
   const id = req.params.id;
   try {
     const results = await util.promisify(connection.query).bind(connection)(
@@ -56,7 +56,7 @@ app.get("/read-todos/:id", async (req, res) => {
 });
 
 // Add todo
-app.post("/add/apis", async (req, res) => {
+app.post('/add-todos', async (req, res) => {
   // value of todo task
   const todo = req.body.todo;
 
@@ -71,14 +71,14 @@ app.post("/add/apis", async (req, res) => {
     await util.promisify(connection.query).bind(connection)(
       `INSERT INTO todo(todo, index_number) VALUES('${todo}', ${results[0].max_index_number}+1024)`
     );
-    res.redirect("/");
+    res.redirect('/');
   } catch (e) {
     res.status(500).send({ e });
   }
 });
 
 // Change order of todo
-app.post("/order-todos/:id", async (req, res) => {
+app.post('/order-todos/:id', async (req, res) => {
   const id = req.params.id;
   // index_number of the task above the dragged and dropped task
   let prevElIndexNumber = req.body.prevElIndexNumber;
@@ -113,9 +113,7 @@ app.post("/order-todos/:id", async (req, res) => {
       Math.abs(currElIndexNumber - nextElIndexNumber) <= 1
     ) {
       // Get index_number in ascending order from 1~ (= orderedData), then update the table
-      const orderedData = await util
-        .promisify(connection.query)
-        .bind(connection)(
+      const orderedData = await util.promisify(connection.query).bind(connection)(
         `SELECT *, ROW_NUMBER() OVER (ORDER BY index_number) as orderedData FROM todo;`
       );
       await Promise.all(
@@ -133,7 +131,7 @@ app.post("/order-todos/:id", async (req, res) => {
 });
 
 // Edit todo
-app.post("/edit-todos/:id", async (req, res) => {
+app.post('/edit-todos/:id', async (req, res) => {
   const id = req.params.id;
   const todo = req.body.newValue;
   console.log(id, todo);
@@ -142,30 +140,28 @@ app.post("/edit-todos/:id", async (req, res) => {
       `UPDATE todo SET todo = '${todo}' where id = ${id}`
     );
 
-    res.redirect("/");
+    res.redirect('/');
   } catch (e) {
     res.status(500).send({ e });
   }
 });
 
 // Delete todo
-app.post("/delete-todos/:id", async (req, res) => {
+app.post('/delete-todos/:id', async (req, res) => {
   const id = req.params.id;
 
   try {
-    await util.promisify(connection.query).bind(connection)(
-      `DELETE FROM todo where id = ${id}`
-    );
+    await util.promisify(connection.query).bind(connection)(`DELETE FROM todo where id = ${id}`);
 
-    res.redirect("/");
+    res.redirect('/');
   } catch (e) {
     res.status(500).send({ e });
   }
 });
 
 // Display the screen
-app.get("/", (req, res) => {
-  res.sendFile(viewsDirectoryPath + "/index.html");
+app.get('/', (req, res) => {
+  res.sendFile(viewsDirectoryPath + '/index.html');
 });
 
 app.listen(port);
